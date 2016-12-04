@@ -9,7 +9,7 @@
      $('body').find('.useful').each(function () {
        var $this = $(this);
        $(this).find('select').once('processed').each(function () {
-         $this.find('[type=submit]').hide();
+         $this.find('input[data-drupal-selector="edit-submit"]').hide();
          var $select = $(this);
          var isPreview = $select.data('is-edit');
          $select.after('<div class="useful-rating"><a href="#"><i class="fa fa-thumbs-down"></i></a><a href="#"><i class="fa fa-thumbs-up"></a></i></div>').hide();
@@ -20,7 +20,7 @@
              }
              e.preventDefault();
              $select.get(0).selectedIndex = 0;
-             $this.find('[type=submit]').trigger('click');
+             $this.find('input[data-drupal-selector="edit-submit"]').trigger('click');
              $this.find('a').addClass('disabled');
            })
          })
@@ -31,7 +31,7 @@
              }
              e.preventDefault();
              $select.get(0).selectedIndex = 1;
-             $this.find('[type=submit]').trigger('click');
+             $this.find('input[data-drupal-selector="edit-submit"]').trigger('click');
              $this.find('a').addClass('disabled');
            })
          })

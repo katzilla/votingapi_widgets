@@ -21,10 +21,12 @@ class BaseRatingForm extends ContentEntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $entity = $this->getEntity();
+    $cancel_access = $entity->id() != null;
     $result_function = $this->getResultFunction($form_state);
     $options = $form_state->get('options');
     $form_id = Html::getUniqueId('vote-form');
     $plugin = $form_state->get('plugin');
+
 
     $form['#cache']['contexts'][] = 'user.permissions';
     $form['#cache']['contexts'][] = 'user.roles:authenticated';
@@ -40,6 +42,22 @@ class BaseRatingForm extends ContentEntityForm {
         'data-style' => ($form_state->get('style')) ? $form_state->get('style') : 'default',
       ],
       '#default_value' => $this->getResults($result_function),
+    ];
+
+    $form['cancel'] = [
+      '#type' => 'button',
+      '#value' => $this->t('cancel vote'),
+      '#access' => $cancel_access,
+      '#ajax' => [
+        'callback' => array($this, 'ajaxCancelVote'),
+        'event' => 'click',
+        'wrapper' => $form_id,
+        'progress' => [
+          'method' => 'replace',
+          'type' => 'throbber',
+          'message' => 'cancelling vote',
+        ],
+      ],
     ];
 
     if ($form_state->get('read_only') || !$plugin->canVote($entity)) {
@@ -75,6 +93,7 @@ class BaseRatingForm extends ContentEntityForm {
     ];
     return $form;
   }
+
 
   /**
    * Get result function.
@@ -129,6 +148,8 @@ class BaseRatingForm extends ContentEntityForm {
     $result_function = $this->getResultFunction($form_state);
     $plugin = $form_state->get('plugin');
     $entity = $this->getEntity();
+    $cancel_access = $entity->id() != null;
+
     $form['value']['#default_value'] = $this->getResults($result_function, TRUE);
     $form['value']['#attributes']['data-default-value'] = $this->getResults($result_function);
     if ($form_state->get('show_results')) {
@@ -137,9 +158,22 @@ class BaseRatingForm extends ContentEntityForm {
     if ($form_state->get('read_only') || !$plugin->canVote($entity)) {
       $form['value']['#attributes']['disabled'] = 'disabled';
     }
+    $form['cancel']['#access'] = $cancel_access;
 
     $form_state->setRebuild(TRUE);
     return $form;
+  }
+
+  /**
+   * Ajax submit handler.
+   */
+  public function ajaxCancelVote(array $form, FormStateInterface $form_state) {
+    $entity = $this->getEntity();
+    $entity->delete();
+    $form['value']['#default_value'] = -1;
+    $form['value']['#attributes']['data-default-value'] = -1;
+    $form_state->setRebuild(TRUE);
+    return $form['value'];
   }
 
   /**

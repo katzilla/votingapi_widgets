@@ -25,12 +25,12 @@
             return;
           }
           $this.find('select').barrating('readonly', true);
-          $this.find('input[type=submit]').trigger('click');
+          $this.find('input[data-drupal-selector="edit-submit"]').trigger('click');
           $this.find('a').addClass('disabled');
-        },
+        }
       };
       $this.find('select').once('processed').barrating('show', options);
-      $this.find('input[type=submit]').hide();
+      $this.find('input[data-drupal-selector="edit-submit"]').hide();
     });
     }
   };
